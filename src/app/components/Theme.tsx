@@ -16,8 +16,10 @@ type Question = {
   theme: string;
 };
 
+const aiueo = "あいうえお\nかきくけこ";
+
 const Theme = () => {
-  const [question, setQuestion] = useState<Question[]>([]);
+  const [question, setQuestion] = useState<Question | null>(null);
   useEffect(() => {
     const fetchProblem = async () => {
       const problemCollectionRef = collection(db, "problems");
@@ -28,8 +30,18 @@ const Theme = () => {
           createdAt: doc.data().createdAt,
           theme: doc.data().theme,
         }));
-        setQuestion(newQuestion);
-        console.log(newQuestion[1]);
+        // setQuestion(newQuestion);
+        // データの中から、当日のものだけ取得
+        console.log(newQuestion[1].createdAt.toDate().getDate());
+        const todayQuestion = newQuestion.filter((value, index) => {
+          if (value.createdAt.toDate().getDate() === new Date().getDate()) {
+            return newQuestion[index];
+          }
+        });
+        console.log(todayQuestion);
+        setQuestion(
+          todayQuestion[Math.floor(Math.random() * todayQuestion.length)]
+        );
       });
     };
     fetchProblem();
@@ -43,10 +55,8 @@ const Theme = () => {
           <h2 className="border-b-2 border-orange-400 text-xl inline">お題</h2>
         </div>
         <div className="bg-normal-beige border-0 h-40 w-4/5 rounded-md">
-          <p>
-            ここにお題の文章が入ります・・・・・・・ ・・・
-            <br />
-            brで改行
+          <p className="whitespace-pre-wrap">
+            {question?.theme.replaceAll("\\n", "\n")}
           </p>
         </div>
       </div>
