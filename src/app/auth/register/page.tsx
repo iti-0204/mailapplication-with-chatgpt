@@ -22,6 +22,7 @@ const Register = () => {
       await addDoc(userInfosRef, {
         userId: user?.uid,
         todayQuestion: "",
+        questionId: "",
       });
     }
   };

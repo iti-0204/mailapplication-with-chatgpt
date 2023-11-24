@@ -24,6 +24,8 @@ type AppContextType = {
   setMyTodayQuestion: React.Dispatch<React.SetStateAction<string | null>>;
   myDocId: string | null;
   setMyDocId: React.Dispatch<React.SetStateAction<string | null>>;
+  myQuestionId: string | null;
+  setMyQuestionId: React.Dispatch<React.SetStateAction<string | null>>;
 };
 
 const defaultContextData = {
@@ -34,12 +36,15 @@ const defaultContextData = {
   setMyTodayQuestion: () => {},
   myDocId: null,
   setMyDocId: () => {},
+  myQuestionId: null,
+  setMyQuestionId: () => {},
 };
 
 type datalist = {
   docId: string;
   id: string;
   todayQuestion: string;
+  questionId: string;
 };
 
 const AppContext = createContext<AppContextType>(defaultContextData);
@@ -49,6 +54,7 @@ export function AppProvider({ children }: AppProviderProps) {
   const [userId, setUserId] = useState<string | null>(null);
   const [myTodayQuestion, setMyTodayQuestion] = useState<string | null>(null);
   const [myDocId, setMyDocId] = useState<string | null>(null);
+  const [myQuestionId, setMyQuestionId] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (newUser) => {
@@ -60,6 +66,7 @@ export function AppProvider({ children }: AppProviderProps) {
       const getdocs = getDocs(fireStorePostData).then((snapShot) => {
         const datalist: datalist[] = snapShot.docs.map((doc) => ({
           docId: doc.id,
+          questionId: doc.data().questionId,
           id: doc.data().userId,
           todayQuestion: doc.data().todayQuestion,
         }));
@@ -67,6 +74,7 @@ export function AppProvider({ children }: AppProviderProps) {
           datalist.forEach((element) => {
             if (element.id === newUser.uid) {
               setMyTodayQuestion(element.todayQuestion);
+              setMyQuestionId(element.questionId);
               setMyDocId(element.docId);
             }
           });
@@ -89,6 +97,8 @@ export function AppProvider({ children }: AppProviderProps) {
         setMyTodayQuestion,
         myDocId,
         setMyDocId,
+        myQuestionId,
+        setMyQuestionId,
       }}
     >
       {children}

@@ -8,6 +8,7 @@ import {
   getDoc,
   onSnapshot,
   query,
+  serverTimestamp,
   updateDoc,
   where,
 } from "firebase/firestore";
@@ -22,8 +23,30 @@ type Question = {
 };
 
 const Theme = () => {
-  const { myTodayQuestion, setMyTodayQuestion, userId, myDocId } =
-    useAppContext();
+  const {
+    myTodayQuestion,
+    setMyTodayQuestion,
+    userId,
+    myDocId,
+    myQuestionId,
+    setMyQuestionId,
+  } = useAppContext();
+
+  const [inputAnswer, setInputAnswer] = useState<string>("");
+
+  const sendAnswer = async () => {
+    console.log("送りました");
+    console.log(myQuestionId);
+    if (inputAnswer && myQuestionId) {
+      console.log(myQuestionId);
+      const questionRef = collection(db, "problems", myQuestionId, "answers");
+      await addDoc(questionRef, {
+        createdAt: serverTimestamp(),
+        text: inputAnswer,
+        userId: userId,
+      });
+    }
+  };
 
   useEffect(() => {
     const fetchProblem = async () => {
@@ -47,15 +70,16 @@ const Theme = () => {
             }
           });
           // ランダムで選択
-          const todayTheme =
-            todayQuestion[Math.floor(Math.random() * todayQuestion.length)]
-              .theme;
+          const todayIndex = Math.floor(Math.random() * todayQuestion.length);
+          const todayTheme = todayQuestion[todayIndex].theme;
+          setMyQuestionId(todayQuestion[todayIndex].id);
           // userinfosのtodayQuestionを変更
           if (myDocId) {
             console.log(todayTheme);
             const docRef = doc(db, "userInfos", myDocId);
             updateDoc(docRef, {
               todayQuestion: todayTheme,
+              questionId: todayQuestion[todayIndex].id,
             });
           }
           // グローバルステートも更新
@@ -74,7 +98,7 @@ const Theme = () => {
       <h1 className="text-2xl py-5">本日のお題</h1>
       <div className="bg-white w-5/6  rounded-md flex justify-center items-center flex-col py-5 mb-10">
         <div className="w-5/6 mb-4">
-          <h2 className="border-b-2 border-orange-400 text-xl inline">お題</h2>
+          <h2 className="border-b-2 border-orange-300 text-xl inline">お題</h2>
         </div>
         <div className="bg-normal-beige border-0 h-40 w-4/5 rounded-md">
           <p className="whitespace-pre-wrap">
@@ -85,11 +109,23 @@ const Theme = () => {
       </div>
       <div className="bg-white w-5/6  rounded-md flex justify-center items-center flex-col py-5">
         <div className="w-5/6 mb-4">
-          <h2 className="border-b-2 border-orange-400 text-xl inline">
+          <h2 className="border-b-2 border-orange-300 text-xl inline">
             メールを書く
           </h2>
         </div>
-        <textarea name="" id="" rows={10} className="border-2 w-4/5"></textarea>
+        <textarea
+          name=""
+          id=""
+          rows={10}
+          className="border-2 w-4/5"
+          onChange={(e) => setInputAnswer(e.target.value)}
+        ></textarea>
+        <button
+          className="mt-4 bg-orange-300 rounded px-4 py-2"
+          onClick={() => sendAnswer()}
+        >
+          提出
+        </button>
       </div>
     </div>
   );
