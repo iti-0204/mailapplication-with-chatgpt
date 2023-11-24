@@ -2,13 +2,18 @@
 
 import {
   Timestamp,
+  addDoc,
   collection,
   doc,
+  getDoc,
   onSnapshot,
   query,
+  updateDoc,
+  where,
 } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { db } from "../../../firebase";
+import { useAppContext } from "@/context/AppContext";
 
 type Question = {
   id: string;
@@ -16,33 +21,50 @@ type Question = {
   theme: string;
 };
 
-const aiueo = "あいうえお\nかきくけこ";
-
 const Theme = () => {
-  const [question, setQuestion] = useState<Question | null>(null);
+  const { myTodayQuestion, setMyTodayQuestion, userId, myDocId } =
+    useAppContext();
+
   useEffect(() => {
     const fetchProblem = async () => {
-      const problemCollectionRef = collection(db, "problems");
-      const q = query(problemCollectionRef);
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        const newQuestion: Question[] = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          createdAt: doc.data().createdAt,
-          theme: doc.data().theme,
-        }));
-        // setQuestion(newQuestion);
-        // データの中から、当日のものだけ取得
-        console.log(newQuestion[1].createdAt.toDate().getDate());
-        const todayQuestion = newQuestion.filter((value, index) => {
-          if (value.createdAt.toDate().getDate() === new Date().getDate()) {
-            return newQuestion[index];
+      // もしAppContext.tsxで、ユーザー情報を取得した結果、本日のお題が""だった時、
+      // 以下の処理で本日のお題を設定。
+      if (myTodayQuestion === "") {
+        // まず全ての問題をデータベースから取得
+        const problemCollectionRef = collection(db, "problems");
+        const q = query(problemCollectionRef);
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+          const newQuestion: Question[] = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            createdAt: doc.data().createdAt,
+            theme: doc.data().theme,
+          }));
+          // データの中から、当日のものだけ取得
+          console.log(newQuestion[1].createdAt.toDate().getDate());
+          const todayQuestion = newQuestion.filter((value, index) => {
+            if (value.createdAt.toDate().getDate() === new Date().getDate()) {
+              return newQuestion[index];
+            }
+          });
+          // ランダムで選択
+          const todayTheme =
+            todayQuestion[Math.floor(Math.random() * todayQuestion.length)]
+              .theme;
+          // userinfosのtodayQuestionを変更
+          if (myDocId) {
+            console.log(todayTheme);
+            const docRef = doc(db, "userInfos", myDocId);
+            updateDoc(docRef, {
+              todayQuestion: todayTheme,
+            });
           }
+          // グローバルステートも更新
+          setMyTodayQuestion(todayTheme);
+          return () => {
+            unsubscribe();
+          };
         });
-        console.log(todayQuestion);
-        setQuestion(
-          todayQuestion[Math.floor(Math.random() * todayQuestion.length)]
-        );
-      });
+      }
     };
     fetchProblem();
   }, []);
@@ -56,7 +78,8 @@ const Theme = () => {
         </div>
         <div className="bg-normal-beige border-0 h-40 w-4/5 rounded-md">
           <p className="whitespace-pre-wrap">
-            {question?.theme.replaceAll("\\n", "\n")}
+            {/* {question?.theme.replaceAll("\\n", "\n")} */}
+            {myTodayQuestion?.replaceAll("\\n", "\n")}
           </p>
         </div>
       </div>

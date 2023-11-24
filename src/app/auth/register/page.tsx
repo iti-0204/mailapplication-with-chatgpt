@@ -1,16 +1,31 @@
 "use client";
 
 // import { auth } from "@/firebase";
-import { auth } from "../../../../firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth, db } from "../../../../firebase";
+import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { type } from "os";
 import { Input } from "postcss";
-import React from "react";
+import React, { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import Link from "next/link";
+import { addDoc, collection } from "firebase/firestore";
 
 const Register = () => {
+  const [inputEmail, setInputEmail] = useState<string>("");
+
+  const registerUserInfo = async () => {
+    if (inputEmail) {
+      const userInfosRef = collection(db, "userInfos");
+      const auth = getAuth();
+      const user = auth.currentUser;
+      await addDoc(userInfosRef, {
+        userId: user?.uid,
+        todayQuestion: "",
+      });
+    }
+  };
+
   const router = useRouter();
   type Inputs = {
     email: string;
@@ -28,6 +43,7 @@ const Register = () => {
       .then((userCredential) => {
         const user = userCredential.user;
         router.push("/auth/login");
+        registerUserInfo();
       })
       .catch((error) => {
         // console.log(error.message);
@@ -61,6 +77,7 @@ const Register = () => {
             })}
             type="text"
             className="mt-1 border-2 rounded-md w-full p-2"
+            onChange={(e) => setInputEmail(e.target.value)}
           />
           {errors.email && (
             <span className="text-red-600">{errors.email.message}</span>
@@ -89,6 +106,7 @@ const Register = () => {
           <button
             type="submit"
             className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700"
+            // onClick={() => registerUserInfo()}
           >
             新規登録
           </button>
