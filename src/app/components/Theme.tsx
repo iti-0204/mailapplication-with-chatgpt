@@ -30,6 +30,8 @@ const Theme = () => {
     myDocId,
     myQuestionId,
     setMyQuestionId,
+    todayAnswer,
+    setTodayAnswer,
   } = useAppContext();
 
   const [inputAnswer, setInputAnswer] = useState<string>("");
@@ -45,6 +47,13 @@ const Theme = () => {
         text: inputAnswer,
         userId: userId,
       });
+    }
+    if (myDocId) {
+      const docRef = doc(db, "userInfos", myDocId);
+      updateDoc(docRef, {
+        todayAnswer: inputAnswer,
+      });
+      setTodayAnswer(inputAnswer);
     }
   };
 

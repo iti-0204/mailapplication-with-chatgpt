@@ -28,6 +28,8 @@ type AppContextType = {
   setMyQuestionId: React.Dispatch<React.SetStateAction<string | null>>;
   pages: string | null;
   setPages: React.Dispatch<React.SetStateAction<string | null>>;
+  todayAnswer: string | null;
+  setTodayAnswer: React.Dispatch<React.SetStateAction<string | null>>;
 };
 
 const defaultContextData = {
@@ -42,6 +44,8 @@ const defaultContextData = {
   setMyQuestionId: () => {},
   pages: null,
   setPages: () => {},
+  todayAnswer: null,
+  setTodayAnswer: () => {},
 };
 
 type datalist = {
@@ -49,6 +53,7 @@ type datalist = {
   id: string;
   todayQuestion: string;
   questionId: string;
+  todayAnswer: string;
 };
 
 const AppContext = createContext<AppContextType>(defaultContextData);
@@ -57,9 +62,11 @@ export function AppProvider({ children }: AppProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [myTodayQuestion, setMyTodayQuestion] = useState<string | null>(null);
+  // userinfosのid
   const [myDocId, setMyDocId] = useState<string | null>(null);
   const [myQuestionId, setMyQuestionId] = useState<string | null>(null);
   const [pages, setPages] = useState<string | null>(null);
+  const [todayAnswer, setTodayAnswer] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (newUser) => {
@@ -74,6 +81,7 @@ export function AppProvider({ children }: AppProviderProps) {
           questionId: doc.data().questionId,
           id: doc.data().userId,
           todayQuestion: doc.data().todayQuestion,
+          todayAnswer: doc.data().todayAnswer,
         }));
         if (newUser) {
           datalist.forEach((element) => {
@@ -81,6 +89,7 @@ export function AppProvider({ children }: AppProviderProps) {
               setMyTodayQuestion(element.todayQuestion);
               setMyQuestionId(element.questionId);
               setMyDocId(element.docId);
+              setTodayAnswer(element.todayAnswer);
             }
           });
         }
@@ -106,6 +115,8 @@ export function AppProvider({ children }: AppProviderProps) {
         setMyQuestionId,
         pages,
         setPages,
+        todayAnswer,
+        setTodayAnswer,
       }}
     >
       {children}

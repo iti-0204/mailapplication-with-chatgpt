@@ -23,6 +23,7 @@ const Register = () => {
         userId: user?.uid,
         todayQuestion: "",
         questionId: "",
+        todayAnswer: "",
       });
     }
   };
