@@ -26,6 +26,8 @@ type AppContextType = {
   setMyDocId: React.Dispatch<React.SetStateAction<string | null>>;
   myQuestionId: string | null;
   setMyQuestionId: React.Dispatch<React.SetStateAction<string | null>>;
+  pages: string | null;
+  setPages: React.Dispatch<React.SetStateAction<string | null>>;
 };
 
 const defaultContextData = {
@@ -38,6 +40,8 @@ const defaultContextData = {
   setMyDocId: () => {},
   myQuestionId: null,
   setMyQuestionId: () => {},
+  pages: null,
+  setPages: () => {},
 };
 
 type datalist = {
@@ -55,6 +59,7 @@ export function AppProvider({ children }: AppProviderProps) {
   const [myTodayQuestion, setMyTodayQuestion] = useState<string | null>(null);
   const [myDocId, setMyDocId] = useState<string | null>(null);
   const [myQuestionId, setMyQuestionId] = useState<string | null>(null);
+  const [pages, setPages] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (newUser) => {
@@ -99,6 +104,8 @@ export function AppProvider({ children }: AppProviderProps) {
         setMyDocId,
         myQuestionId,
         setMyQuestionId,
+        pages,
+        setPages,
       }}
     >
       {children}

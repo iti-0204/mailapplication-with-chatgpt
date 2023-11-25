@@ -100,14 +100,13 @@ const Theme = () => {
         <div className="w-5/6 mb-4">
           <h2 className="border-b-2 border-orange-300 text-xl inline">お題</h2>
         </div>
-        <div className="bg-normal-beige border-0 h-40 w-4/5 rounded-md">
+        <div className="bg-normal-beige border-0  w-4/5 rounded-md p-4">
           <p className="whitespace-pre-wrap">
-            {/* {question?.theme.replaceAll("\\n", "\n")} */}
             {myTodayQuestion?.replaceAll("\\n", "\n")}
           </p>
         </div>
       </div>
-      <div className="bg-white w-5/6  rounded-md flex justify-center items-center flex-col py-5">
+      <div className="bg-white w-5/6  rounded-md flex justify-center items-center flex-col py-5 mb-4">
         <div className="w-5/6 mb-4">
           <h2 className="border-b-2 border-orange-300 text-xl inline">
             メールを書く
