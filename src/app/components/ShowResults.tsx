@@ -1,14 +1,51 @@
-import React from "react";
+"use client";
+
+import React, { useEffect } from "react";
 import Rank from "./Rank";
 import Comment from "./Comment";
+import { useAppContext } from "@/context/AppContext";
+import { Timestamp, collection, onSnapshot, query } from "firebase/firestore";
+import { db } from "../../../firebase";
+
+type Answer = {
+  createdAt: Timestamp;
+  text: string;
+  userId: string;
+};
 
 const ShowResults = () => {
+  const { todayAnswer, setTodayAnswer, myQuestionId, setMyQuestionId } =
+    useAppContext();
 
   // ここからchatgptの処理
   // もし昨日問題を回答していたら、
-  // ----まず問題のidから、その問題の回答を全て取得する
+  useEffect(() => {
+    if (todayAnswer && todayAnswer != "") {
+      // ----まず問題のidから、その問題の回答を全て取得する
+      // その問題の回答を集める
+      if (myQuestionId) {
+        const CollectionRef = collection(
+          db,
+          "problems",
+          myQuestionId,
+          "answers"
+        );
+        const q = query(CollectionRef);
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+          const allAnswers: Answer[] = snapshot.docs.map((doc) => ({
+            createdAt: doc.data().createdAt,
+            text: doc.data().text,
+            userId: doc.data().userId,
+          }));
+          console.log(allAnswers);
+          return () => {
+            unsubscribe();
+          };
+        });
+      }
+    }
+  });
 
-  // その問題の回答を集める
   // その後、chatgptにぶつける
   // レスポンスから順位を判定して、順位とコメントを描画。
   return (
