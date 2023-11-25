@@ -6,6 +6,7 @@ import Comment from "./Comment";
 import { useAppContext } from "@/context/AppContext";
 import { Timestamp, collection, onSnapshot, query } from "firebase/firestore";
 import { db } from "../../../firebase";
+import OpenAI from "openai";
 
 type Answer = {
   createdAt: Timestamp;
@@ -14,8 +15,27 @@ type Answer = {
 };
 
 const ShowResults = () => {
-  const { todayAnswer, setTodayAnswer, myQuestionId, setMyQuestionId } =
-    useAppContext();
+  const {
+    todayAnswer,
+    setTodayAnswer,
+    myQuestionId,
+    setMyQuestionId,
+    myTodayQuestion,
+    setMyTodayQuestion,
+  } = useAppContext();
+
+  const openai = new OpenAI({
+    apiKey: process.env.NEXT_PUBLIC_OPENAI_KEY,
+    dangerouslyAllowBrowser: true,
+  });
+
+  let togptQuestion =
+    "今から審査員になってください。今回メールに関するお題が一つ与えられ、それに対していくつかのユーザーが回答します。今回審査員には、与えられたお題と、それに対する全ての回答についてコメントをし、順位付けをしてほしいです。コメントについては、良かった点と改善すると良い点をそれぞれ書いてほしいです。順位付けの基準については、ビジネスメールとしてより相応しいものには、高い順位を与えるという基準でお願いします。回答のフォーマットについても指定をします。以下のフォーマットでコメントと順位をつけてください。\n1位：〇〇(ユーザーid)：コメント〜〜〜\n2位：〇〇(ユーザーid)：コメント〜〜〜\n3位：〇〇(ユーザーid)：コメント〜〜〜\n以下は今回のお題と、各ユーザーの回答、回答したユーザーのユーザーidです。お願いします。";
+
+  if (myTodayQuestion) {
+    // togptQuestion.concat("お題\n", myTodayQuestion);
+    togptQuestion = togptQuestion + "\nお題\n" + myTodayQuestion + "\n";
+  }
 
   // ここからchatgptの処理
   // もし昨日問題を回答していたら、
@@ -38,6 +58,12 @@ const ShowResults = () => {
             userId: doc.data().userId,
           }));
           console.log(allAnswers);
+          togptQuestion = togptQuestion + "\n回答\n";
+          allAnswers.forEach((value, index) => {
+            togptQuestion =
+              togptQuestion + value.userId + "\n" + value.text + "\n\n";
+          });
+          console.log(togptQuestion);
           return () => {
             unsubscribe();
           };
