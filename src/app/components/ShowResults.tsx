@@ -4,7 +4,14 @@ import React, { useEffect } from "react";
 import Rank from "./Rank";
 import Comment from "./Comment";
 import { useAppContext } from "@/context/AppContext";
-import { Timestamp, collection, onSnapshot, query } from "firebase/firestore";
+import {
+  Timestamp,
+  collection,
+  doc,
+  onSnapshot,
+  query,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "../../../firebase";
 import OpenAI from "openai";
 
@@ -26,6 +33,7 @@ const ShowResults = () => {
     setYesterdayResult,
     gptQuestion,
     setGptQuestion,
+    myDocId,
   } = useAppContext();
 
   const openai = new OpenAI({
@@ -77,7 +85,7 @@ const ShowResults = () => {
           });
           togptQuestion2 =
             togptQuestion2 +
-            "\nこれらに対しそれぞれアドバイスを提示し、順位をつけてください。また回答のフォーマットについても以下の通りにお願いします。\n1位：\n{1位のユーザーid}\n回答：{1位のユーザーの回答文}\nアドバイス：\n{アドバイス}\n";
+            "\nこれらに対しそれぞれアドバイスを提示し、順位をつけてください。アドバイスは約2言程度でお願いします。また、こちらが提示した返信の数にだけ、回答してください。例えば、こちらが提示した返信の数が1つの場合、あなたは1つだけについてアドバイスをしてください。また回答のフォーマットについても以下の通りにお願いします。\n1位：\n{1位のユーザーid}\n回答：{1位のユーザーの回答文}\nアドバイス：\n{アドバイス}\n";
           setGptQuestion(togptQuestion2);
           // 送信
           return () => {
@@ -97,8 +105,14 @@ const ShowResults = () => {
       model: "gpt-3.5-turbo",
     });
     const botResponse = gpt3Response.choices[0].message.content;
-    // レスポンスをグローバル変数に格納
+    // レスポンスをグローバル変数とuserinfoに格納
     if (botResponse?.includes("1位") && yesterdayResult == null) {
+      if (myDocId) {
+        const docRef = doc(db, "userInfos", myDocId);
+        updateDoc(docRef, {
+          yesterdayResult: yesterdayResult,
+        });
+      }
       setYesterdayResult(botResponse);
     }
   };

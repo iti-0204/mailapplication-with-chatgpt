@@ -24,6 +24,7 @@ const Register = () => {
         todayQuestion: "",
         questionId: "",
         todayAnswer: "",
+        yesterdayResult: "",
       });
     }
   };

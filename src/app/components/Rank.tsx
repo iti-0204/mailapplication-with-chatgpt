@@ -16,6 +16,7 @@ const Rank = () => {
   // ここで、substring()で以上の二つを指定すると、一位のユーザーidが出る。
   //それをranklistに登録する。
   // 次に、回答：という文字列を探す。その後、アドバイス：という文字列を探す。
+  console.log(yesterdayResult);
   if (yesterdayResult) {
     while (searchIndex != -3) {
       rankUser = yesterdayResult.substring(
@@ -42,6 +43,7 @@ const Rank = () => {
       resultList.push({ userId: rankUser, answer: answer, advice: advice });
       console.log(resultList);
     }
+    searchIndex = 0;
   }
 
   return (
@@ -50,12 +52,12 @@ const Rank = () => {
         <h2 className="border-b-2 border-orange-300 text-xl inline">順位</h2>
         <div className="py-4">
           {resultList.map((value, index) => (
-            <div>
-              <p key={index}>
+            <div key={index} className="py-2">
+              <p>
                 {index + 1}位：{value.userId}
               </p>
-              <p key={index}>回答：{value.answer}</p>
-              <p key={index}>アドバイス：{value.advice}</p>
+              <p>回答：{value.answer}</p>
+              <p>アドバイス：{value.advice}</p>
             </div>
           ))}
         </div>
