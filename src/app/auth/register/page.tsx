@@ -25,6 +25,7 @@ const Register = () => {
         questionId: "",
         todayAnswer: "",
         yesterdayResult: "",
+        lastAnswerDate: null,
       });
     }
   };

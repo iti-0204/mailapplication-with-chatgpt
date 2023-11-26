@@ -9,7 +9,15 @@ import {
   useState,
 } from "react";
 import { auth, db } from "../../firebase";
-import { addDoc, collection, doc, getDoc, getDocs } from "firebase/firestore";
+import {
+  Timestamp,
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  updateDoc,
+} from "firebase/firestore";
 import { get } from "firebase/database";
 
 type AppProviderProps = {
@@ -34,6 +42,8 @@ type AppContextType = {
   setYesterdayResult: React.Dispatch<React.SetStateAction<string | null>>;
   gptQuestion: string | null;
   setGptQuestion: React.Dispatch<React.SetStateAction<string | null>>;
+  lastAnswerDate: Timestamp | null;
+  setLastAnswerDate: React.Dispatch<React.SetStateAction<Timestamp | null>>;
 };
 
 const defaultContextData = {
@@ -54,6 +64,8 @@ const defaultContextData = {
   setYesterdayResult: () => {},
   gptQuestion: null,
   setGptQuestion: () => {},
+  lastAnswerDate: null,
+  setLastAnswerDate: () => {},
 };
 
 type datalist = {
@@ -62,6 +74,7 @@ type datalist = {
   todayQuestion: string;
   questionId: string;
   todayAnswer: string;
+  lastAnswerDate: Timestamp;
   // yesterdayResult: string;
 };
 
@@ -78,6 +91,7 @@ export function AppProvider({ children }: AppProviderProps) {
   const [todayAnswer, setTodayAnswer] = useState<string | null>(null);
   const [yesterdayResult, setYesterdayResult] = useState<string | null>(null);
   const [gptQuestion, setGptQuestion] = useState<string | null>(null);
+  const [lastAnswerDate, setLastAnswerDate] = useState<Timestamp | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (newUser) => {
@@ -93,6 +107,7 @@ export function AppProvider({ children }: AppProviderProps) {
           id: doc.data().userId,
           todayQuestion: doc.data().todayQuestion,
           todayAnswer: doc.data().todayAnswer,
+          lastAnswerDate: doc.data().lastAnswerDate,
           // yesterdayResult:doc.data().yestedayResult
         }));
         if (newUser) {
@@ -102,8 +117,26 @@ export function AppProvider({ children }: AppProviderProps) {
               setMyQuestionId(element.questionId);
               setMyDocId(element.docId);
               setTodayAnswer(element.todayAnswer);
+              setLastAnswerDate(element.lastAnswerDate);
             }
           });
+        }
+        if (lastAnswerDate) {
+          if (lastAnswerDate.toDate().getDate() === new Date().getDate() - 1) {
+            // 消す
+            setMyTodayQuestion("");
+            setMyQuestionId("");
+            setTodayAnswer("");
+            setLastAnswerDate(null);
+            if (myDocId) {
+              const docRef = doc(db, "userInfos", myDocId);
+              updateDoc(docRef, {
+                questionId: "",
+                todayAnswer: "",
+                todayQuestion: "",
+              });
+            }
+          }
         }
       });
     });
@@ -133,6 +166,8 @@ export function AppProvider({ children }: AppProviderProps) {
         setYesterdayResult,
         gptQuestion,
         setGptQuestion,
+        lastAnswerDate,
+        setLastAnswerDate,
       }}
     >
       {children}
