@@ -38,6 +38,9 @@ const Theme = () => {
 
   const sendAnswer = async () => {
     console.log("送りました");
+    if (!inputAnswer) {
+      alert("入力してください。");
+    }
     console.log(myQuestionId);
     if (inputAnswer && myQuestionId) {
       console.log(myQuestionId);
@@ -121,19 +124,29 @@ const Theme = () => {
             メールを書く
           </h2>
         </div>
-        <textarea
-          name=""
-          id=""
-          rows={10}
-          className="border-2 w-4/5"
-          onChange={(e) => setInputAnswer(e.target.value)}
-        ></textarea>
-        <button
-          className="mt-4 bg-orange-300 rounded px-4 py-2"
-          onClick={() => sendAnswer()}
-        >
-          提出
-        </button>
+        {todayAnswer == null || todayAnswer == "" ? (
+          <div className="w-5/6 flex flex-col items-center">
+            <textarea
+              name=""
+              id=""
+              rows={10}
+              required
+              className="border-2 w-full my-6"
+              onChange={(e) => setInputAnswer(e.target.value)}
+            ></textarea>
+            <button
+              className="mt-4 bg-orange-300 rounded px-4 py-2"
+              onClick={() => sendAnswer()}
+            >
+              提出
+            </button>
+          </div>
+        ) : (
+          <div className="py-10">
+            <p className="text-center">今日はすでにメールを書いています。</p>
+            <p className="text-center">結果をご覧ください。</p>
+          </div>
+        )}
       </div>
     </div>
   );

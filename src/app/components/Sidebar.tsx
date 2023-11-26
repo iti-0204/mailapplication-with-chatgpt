@@ -14,7 +14,7 @@ import {
 const Sidebar = () => {
   const router = useRouter();
 
-  const { pages, setPages } = useAppContext();
+  const { pages, setPages, userId, user } = useAppContext();
 
   const pushTop = () => {
     setPages("top");
@@ -62,6 +62,13 @@ const Sidebar = () => {
         <AiOutlineUser size={"50%"} />
         <p>マイページ</p>
       </div>
+
+      {user && (
+        <div className="pt-6">
+          ユーザーID:
+          <div className="text-xs">{userId}</div>
+        </div>
+      )}
     </div>
   );
 };

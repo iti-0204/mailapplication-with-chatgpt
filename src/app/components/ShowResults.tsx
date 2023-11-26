@@ -34,6 +34,8 @@ const ShowResults = () => {
     gptQuestion,
     setGptQuestion,
     myDocId,
+    isLoading,
+    setIsLoading,
   } = useAppContext();
 
   const openai = new OpenAI({
@@ -41,7 +43,7 @@ const ShowResults = () => {
     dangerouslyAllowBrowser: true,
   });
 
-  console.log(myTodayQuestion);
+  // console.log(myTodayQuestion);
   const afterDeleteLine = myTodayQuestion?.replace(/\\n/g, "\n");
   const afterDeleteSpace1 = afterDeleteLine?.replace(/　/g, "");
   const afterDeleteSpace2 = afterDeleteSpace1?.replace(/ /g, "");
@@ -78,14 +80,14 @@ const ShowResults = () => {
             text: doc.data().text,
             userId: doc.data().userId,
           }));
-          console.log(allAnswers);
+          // console.log(allAnswers);
           // プロンプトの作成
           allAnswers.forEach((value) => {
-            togptQuestion2 = `${togptQuestion2} \n${value.userId}の回答\n「川島様\n${value.text}」`;
+            togptQuestion2 = `${togptQuestion2} \n${value.userId}の回答\n「\n${value.text}」`;
           });
           togptQuestion2 =
             togptQuestion2 +
-            "\nこれらに対しそれぞれアドバイスを提示し、順位をつけてください。アドバイスは約2言程度でお願いします。また、こちらが提示した返信の数にだけ、回答してください。例えば、こちらが提示した返信の数が1つの場合、あなたは1つだけについてアドバイスをしてください。また回答のフォーマットについても以下の通りにお願いします。\n1位：\n{1位のユーザーid}\n回答：{1位のユーザーの回答文}\nアドバイス：\n{アドバイス}\n";
+            "\nこれらに対しそれぞれアドバイスを提示し、順位をつけてください。アドバイスは約2言程度でお願いします。また、こちらが提示した返信の数にだけ、回答してください。また回答のフォーマットについても以下の通りにお願いします。\n1位：\n{1位のユーザーid}\n回答：{1位のユーザーの回答文}\nアドバイス：\n{アドバイス}\n";
           setGptQuestion(togptQuestion2);
           // 送信
           return () => {
@@ -99,11 +101,13 @@ const ShowResults = () => {
   // ここからchatgptの処理
   // もし昨日問題を回答していたら、
   const gptSeeking = async () => {
-    console.log(togptQuestion2);
+    setIsLoading(true);
+    // console.log(togptQuestion2);
     const gpt3Response = await openai.chat.completions.create({
       messages: [{ role: "user", content: gptQuestion }],
       model: "gpt-3.5-turbo",
     });
+    setIsLoading(false);
     const botResponse = gpt3Response.choices[0].message.content;
     // レスポンスをグローバル変数とuserinfoに格納
     if (botResponse?.includes("1位") && yesterdayResult == null) {
@@ -119,7 +123,6 @@ const ShowResults = () => {
   useEffect(() => {
     const f = async () => {
       await gptsetting();
-      console.log(togptQuestion2);
       if (gptQuestion != null) {
         gptSeeking();
       }
@@ -128,15 +131,10 @@ const ShowResults = () => {
   });
 
   return (
-    <div className="flex items-center flex-col bg-base-gray border-0 ">
+    <div className="flex items-center flex-col bg-base-gray border-0 w-full">
       <h1 className="text-2xl py-5">結果を見る</h1>
-      <div className="flex w-full justify-between">
-        <div className="w-1/2 h-full flex justify-center">
-          <Rank />
-        </div>
-        <div className="w-1/2 h-full flex justify-center">
-          <Comment />
-        </div>
+      <div className=" h-full flex justify-center w-full">
+        <Rank />
       </div>
     </div>
   );

@@ -44,6 +44,8 @@ type AppContextType = {
   setGptQuestion: React.Dispatch<React.SetStateAction<string | null>>;
   lastAnswerDate: Timestamp | null;
   setLastAnswerDate: React.Dispatch<React.SetStateAction<Timestamp | null>>;
+  isLoading: boolean | null;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean | null>>;
 };
 
 const defaultContextData = {
@@ -66,6 +68,8 @@ const defaultContextData = {
   setGptQuestion: () => {},
   lastAnswerDate: null,
   setLastAnswerDate: () => {},
+  isLoading: null,
+  setIsLoading: () => {},
 };
 
 type datalist = {
@@ -92,6 +96,7 @@ export function AppProvider({ children }: AppProviderProps) {
   const [yesterdayResult, setYesterdayResult] = useState<string | null>(null);
   const [gptQuestion, setGptQuestion] = useState<string | null>(null);
   const [lastAnswerDate, setLastAnswerDate] = useState<Timestamp | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (newUser) => {
@@ -168,6 +173,8 @@ export function AppProvider({ children }: AppProviderProps) {
         setGptQuestion,
         lastAnswerDate,
         setLastAnswerDate,
+        isLoading,
+        setIsLoading,
       }}
     >
       {children}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useAppContext } from "@/context/AppContext";
 import { auth } from "../../../../firebase";
 import {
   createUserWithEmailAndPassword,
@@ -13,6 +14,7 @@ import React from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 
 const Login = () => {
+  const { setPages } = useAppContext();
   const router = useRouter();
   type Inputs = {
     email: string;
@@ -29,6 +31,7 @@ const Login = () => {
     await signInWithEmailAndPassword(auth, data.email, data.password)
       .then((userCredential) => {
         router.push("/");
+        setPages("top");
       })
       .catch((error) => {
         if (error.code === "auth/invalid-login-credentials") {
