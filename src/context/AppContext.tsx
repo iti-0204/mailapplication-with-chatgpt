@@ -30,6 +30,10 @@ type AppContextType = {
   setPages: React.Dispatch<React.SetStateAction<string | null>>;
   todayAnswer: string | null;
   setTodayAnswer: React.Dispatch<React.SetStateAction<string | null>>;
+  yesterdayResult: string | null;
+  setYesterdayResult: React.Dispatch<React.SetStateAction<string | null>>;
+  gptQuestion: string | null;
+  setGptQuestion: React.Dispatch<React.SetStateAction<string | null>>;
 };
 
 const defaultContextData = {
@@ -46,6 +50,10 @@ const defaultContextData = {
   setPages: () => {},
   todayAnswer: null,
   setTodayAnswer: () => {},
+  yesterdayResult: null,
+  setYesterdayResult: () => {},
+  gptQuestion: null,
+  setGptQuestion: () => {},
 };
 
 type datalist = {
@@ -54,6 +62,7 @@ type datalist = {
   todayQuestion: string;
   questionId: string;
   todayAnswer: string;
+  // yesterdayResult: string;
 };
 
 const AppContext = createContext<AppContextType>(defaultContextData);
@@ -67,6 +76,8 @@ export function AppProvider({ children }: AppProviderProps) {
   const [myQuestionId, setMyQuestionId] = useState<string | null>(null);
   const [pages, setPages] = useState<string | null>(null);
   const [todayAnswer, setTodayAnswer] = useState<string | null>(null);
+  const [yesterdayResult, setYesterdayResult] = useState<string | null>(null);
+  const [gptQuestion, setGptQuestion] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (newUser) => {
@@ -82,6 +93,7 @@ export function AppProvider({ children }: AppProviderProps) {
           id: doc.data().userId,
           todayQuestion: doc.data().todayQuestion,
           todayAnswer: doc.data().todayAnswer,
+          // yesterdayResult:doc.data().yestedayResult
         }));
         if (newUser) {
           datalist.forEach((element) => {
@@ -117,6 +129,10 @@ export function AppProvider({ children }: AppProviderProps) {
         setPages,
         todayAnswer,
         setTodayAnswer,
+        yesterdayResult,
+        setYesterdayResult,
+        gptQuestion,
+        setGptQuestion,
       }}
     >
       {children}
